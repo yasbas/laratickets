@@ -1,3 +1,11 @@
+## TODO
+
+- Seed roles
+- Seed users
+- Admin dashboard
+- User dashboard
+- Tickets
+- Ticket CRUD
 
 ### Laravel setup notes
 #### Adding User UI:
