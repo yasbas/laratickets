@@ -33,4 +33,4 @@ In tinker:
 
 Then assign admin user:
 
-> \> $roleAdmin->assignRole('admin');
+> \> $user->assignRole('admin');

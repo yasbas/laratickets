@@ -15,6 +15,12 @@
                     @endif
 
                     {{ __('You are logged in!') }}
+                    @role('admin')
+                        {{ __('As admin') }}
+                    @endrole
+                    @role('user')
+                        {{ __('As user') }}
+                    @endrole
                 </div>
             </div>
         </div>
