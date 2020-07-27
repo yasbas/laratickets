@@ -1,7 +1,7 @@
 ## TODO
 
-- Seed roles
-- Seed users
+- ~~Seed roles~~
+- ~~Seed users~~
 - Admin dashboard
 - User dashboard
 - Tickets
@@ -42,3 +42,8 @@ In tinker:
 Then assign admin user:
 
 > \> $user->assignRole('admin');
+
+### Refresh the App, migrations and tables data:
+
+> \> php artisan migrate:fresh
+> \> php artisan db:seed
