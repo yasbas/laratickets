@@ -2,6 +2,7 @@
 
 use App\User;
 use Illuminate\Database\Seeder;
+use Faker\Generator as Faker;
 
 class UsersSeeder extends Seeder
 {
@@ -10,20 +11,19 @@ class UsersSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(Faker $faker)
     {
+        // Create Admin/Support Agent user
         $adminUser = User::create([
             'name' => 'Admin',
             'email' => 'admin@asd.com',
             'password' => bcrypt('123456'),
         ]);
-        $adminUser->assignRole('admin');
+        $adminUser->assignRole(User::ROLE_ADMIN);
 
-        $userUser = User::create([
-            'name' => 'User',
-            'email' => 'user@asd.com',
-            'password' => bcrypt('123456'),
-        ]);
-        $userUser->assignRole('admin');
+        // Create normal users
+        factory(App\User::class, 50)->create()->each(function ($user) {
+            $user->assignRole(User::ROLE_USER);
+        });
     }
 }
