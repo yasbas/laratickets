@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\TicketService;
 use App\Ticket;
 use App\User;
 use Illuminate\Http\Request;
@@ -26,9 +27,7 @@ class HomeController extends Controller
     public function index()
     {
         $user = auth()->user();
-        $isAdmin = $user->hasRole(User::ROLE_ADMIN);
-        // YADO: Make it get user's tickets only if role is USER
-        $tickets = $isAdmin ? Ticket::all() : $user->tickets()->orderBy('updated_at')->get();
+        $tickets = TicketService::getTickets($user);
 
         return view('home', [
             'tickets' => $tickets,
