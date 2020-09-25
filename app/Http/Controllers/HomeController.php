@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\TicketService;
 use App\Ticket;
+use App\User;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -24,6 +26,11 @@ class HomeController extends Controller
      */
     public function index()
     {
-        return view('home');
+        $user = auth()->user();
+        $tickets = TicketService::getTickets($user);
+
+        return view('home', [
+            'tickets' => $tickets,
+        ]);
     }
 }
