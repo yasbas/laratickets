@@ -4,10 +4,12 @@
 - ~~Seed users~~
 - ~~Admin dashboard~~
 - ~~User dashboard~~
+- DEFINE MVP (minimal viable product!!!)
 - Tickets
     - ~~Disable admin user to create tickets !!!~~
+    - Test the TicketService !!!
 - Ticket CRUD
-    - Read
+    - Read/View
     - Create
     - Update
     - Delete
