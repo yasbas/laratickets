@@ -2,10 +2,16 @@
 
 - ~~Seed roles~~
 - ~~Seed users~~
-- Admin dashboard
-- User dashboard
+- ~~Admin dashboard~~
+- ~~User dashboard~~
 - Tickets
+    - ~~Disable admin user to create tickets !!!~~
 - Ticket CRUD
+    - Read
+    - Create
+    - Update
+    - Delete
+    - Close
 
 ### Laravel setup notes
 #### Adding User UI:

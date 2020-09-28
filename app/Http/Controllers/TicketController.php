@@ -7,7 +7,7 @@ use App\Ticket;
 use App\User;
 use Illuminate\Http\Request;
 
-class HomeController extends Controller
+class TicketController extends Controller
 {
     /**
      * Create a new controller instance.
