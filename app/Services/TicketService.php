@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Ticket;
-use App\User;
+use App\Models\Ticket;
+use App\Models\User;
 
 class TicketService {
 

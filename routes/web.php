@@ -19,6 +19,8 @@ Route::get('/', function () {
 
 Auth::routes();
 
-Route::group(['middleware' => 'auth'], function () {
-    Route::get('/home', 'TicketController@index')->name('home');
-});
+//Route::group(['middleware' => 'auth'], function () {
+//    Route::get('/home', 'TicketController@index')->name('home');
+//});
+
+Route::get('/home', 'TicketController@index')->name('home');

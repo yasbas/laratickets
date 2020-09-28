@@ -1,14 +1,31 @@
 <?php
 
+namespace Database\Factories;
+
 /** @var \Illuminate\Database\Eloquent\Factory $factory */
 
-use App\Model;
-use App\Ticket;
-use Faker\Generator as Faker;
+use App\Models\Ticket;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-$factory->define(Ticket::class, function (Faker $faker) {
-    return [
-        'title' => $faker->catchPhrase,
-        'body' => $faker->text,
-    ];
-});
+class TicketFactory extends Factory
+{
+    /**
+     * The name of the factory's corresponding model.
+     *
+     * @var string
+     */
+    protected $model = Ticket::class;
+
+    /**
+     * Define the model's default state.
+     *
+     * @return array
+     */
+    public function definition()
+    {
+        return [
+            'title' => $this->faker->catchPhrase,
+            'body' => $this->faker->text,
+        ];
+    }
+}

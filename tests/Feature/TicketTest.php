@@ -3,11 +3,10 @@
 namespace Tests\Feature;
 
 use App\Services\TicketService;
-use App\Ticket;
-use App\User;
+use App\Models\Ticket;
+use App\Models\User;
 use DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Str;
 use Spatie\Permission\Traits\HasRoles;
 use Tests\TestCase;
@@ -36,10 +35,8 @@ class TicketTest extends TestCase
 
     protected function loginUser($user)
     {
-        $this->post('/login', [
-            'email' => $user->email,
-            'password' => '123456',
-        ]);
+        $this->actingAs($user)
+            ->get('/login');
     }
 
     public function testUserCanSeeOnlyOwnTickets()
