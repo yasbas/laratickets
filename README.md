@@ -26,13 +26,13 @@ Features for the initial release:
         - [login with Facebook]
         - [Login with Google]
         - [Login with Twitter]
-    - Admin can view and reply to all tickets. Admin can't create tickets. 
-    - User can only view and reply to own tickets. User can create tickets.
+    - Admin can view (and reply) to all tickets. Admin can't create tickets. 
+    - User can only view (and reply) to own tickets. User can create tickets.
     
 - Tickets
     - Ticket can be created, viewed, updated, closed and reopened.
     - Ticket can have many replies (from an admin and user who created the ticket).
-    - Replies can be edited and deleted by an admin. User can only edit it.  
+    - Replies can be edited and deleted by an admin. User can only create and edit it.  
     - Tickets and replies can have attached files, like: text, pdf, docs and media files.
     - [Tickets and replies can have inserted links to video clips, which will be auto-converted to embedded players.]
     
