@@ -104,3 +104,136 @@ Then assign admin user:
 
 > \> php artisan migrate:fresh
 > \> php artisan db:seed
+
+
+### Add Socialite and Envato login
+
+First install Socialite official package:
+
+(https://laravel.com/docs/8.x/socialite)
+
+> \> composer require laravel/socialite 
+
+Then add the Envato package from the extended socialite packages:
+(https://laravel.com/docs/8.x/socialite)
+
+> \> composer require socialiteproviders/envato
+
+Add configuration to config/services.php
+
+```
+'envato' => [    
+   'client_id' => env('ENVATO_KEY'),  
+   'client_secret' => env('ENVATO_SECRET'),  
+   'redirect' => env('ENVATO_REDIRECT_URI') 
+ ],
+```  
+
+And then add the constants to the .env file (don't forget to change the ENVATO_REDIRECT_URI value with the actual one):
+
+```
+ENVATO_KEY=helpdesk-envato-login-wmdjwtiy
+ENVATO_SECRET=TAdi42SN7wEqgq3GOXgCgUcPCTNJUjJM
+ENVATO_REDIRECT_URI=http://envato-login.local/login/envato/callback
+```
+
+Remove Laravel\Socialite\SocialiteServiceProvider from your providers[] array in config\app.php if you have added it already.
+
+Add \SocialiteProviders\Manager\ServiceProvider::class to your providers[] array in config\app.php.
+
+For example:
+
+```
+'providers' => [
+    // a whole bunch of providers
+    // remove 'Laravel\Socialite\SocialiteServiceProvider',
+    \SocialiteProviders\Manager\ServiceProvider::class, // add
+];
+```
+
+Next, add provider event listener:
+
+Configure the package's listener to listen for SocialiteWasCalled events.
+
+Add the event to your listen[] array in app/Providers/EventServiceProvider
+
+For example:
+
+```
+    protected $listen = [
+        \SocialiteProviders\Manager\SocialiteWasCalled::class => [
+            'SocialiteProviders\\Envato\\EnvatoExtendSocialite@handle',
+        ],
+        Registered::class => [
+            SendEmailVerificationNotification::class,
+        ],
+    ];
+```
+
+Add routes to routes/web.php
+
+```
+Route::get('login/envato', 'Auth\LoginController@redirectToProvider');
+Route::get('login/envato/callback', 'Auth\LoginController@handleProviderCallback');
+```
+
+Then add the login methods to LoginController:
+
+```
+    /**
+     * Redirect the user to the GitHub authentication page.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function redirectToProvider()
+    {
+        return Socialite::with('envato')->redirect();
+    }
+
+    /**
+     * Obtain the user information from GitHub.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function handleProviderCallback()
+    {
+        $envatoUser = Socialite::driver('envato')->user();
+
+        dd($envatoUser);
+
+        /*$user = User::where('provider_id', $githubUser->getId())->first();
+
+        if (!$user) {
+            // add user to database
+            $user = User::create([
+                'email' => $githubUser->getEmail(),
+                'name' => $githubUser->getName(),
+                'provider_id' => $githubUser->getId(),
+            ]);
+        }
+
+        // login the user
+        Auth::login($user, true);
+
+        return redirect($this->redirectTo);*/
+    }
+```
+
+Next, add the "Login with Envato" button to the login form.
+
+Edit resources/views/auth/login.blade.php, below the current Login button:
+
+```
+<button type="submit" class="btn btn-primary">
+    {{ __('Login') }}
+</button>
+```
+
+Add the Envato login button:
+
+```
+<a href="login/envato" type="submit" class="btn btn-primary">
+    Login with Envato
+</a>
+
+```
