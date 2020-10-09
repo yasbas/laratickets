@@ -73,7 +73,7 @@ class LoginController extends Controller
             $user = User::create([
                 'email' => $envatoUser->getEmail(),
                 'name' => $envatoUser->getName(),
-                //'provider_id' => $envatoUser->getId(),
+                'provider' => User::LOGIN_PROVIDER_ENVATO,
                 'provider_id' => $userEnvatoId,
             ]);
         }
