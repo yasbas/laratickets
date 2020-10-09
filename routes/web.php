@@ -24,3 +24,7 @@ Auth::routes();
 //});
 
 Route::get('/home', 'TicketController@index')->name('home');
+
+Route::get('login/envato', 'Auth\LoginController@redirectToProvider');
+Route::get('login/envato/callback', 'Auth\LoginController@handleProviderCallback');
+

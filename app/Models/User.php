@@ -13,9 +13,11 @@ class User extends Authenticatable
     use Notifiable;
     use HasRoles;
     use HasFactory;
-
+    // Roles
     const ROLE_ADMIN = 'admin';
     const ROLE_USER = 'user';
+    // Login providers
+    const LOGIN_PROVIDER_ENVATO = 'envato';
 
     protected $guard_name = 'web';
 
@@ -25,7 +27,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password',
+        'name', 'email', 'password', 'provider', 'provider_id',
     ];
 
     /**
