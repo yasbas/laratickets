@@ -23,7 +23,11 @@
 {{--                    @endrole--}}
 
                     @foreach($tickets as $ticket)
-                        <p>{{ $ticket->title }}</p>
+                        <p>
+                            <a href="/ticket/{{ $ticket->id }}">
+                                {{ $ticket->title }}
+                            </a>
+                        </p>
                     @endforeach
 
 

@@ -4,8 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Services\TicketService;
 use App\Models\Ticket;
-use App\Models\User;
-use Illuminate\Http\Request;
+use Illuminate\Contracts\Support\Renderable as RenderableAlias;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\View\View;
 
 class TicketController extends Controller
 {
@@ -22,15 +23,25 @@ class TicketController extends Controller
     /**
      * Show the application dashboard.
      *
-     * @return \Illuminate\Contracts\Support\Renderable
+     * @return View
      */
-    public function index()
+    public function index(): View
     {
-        $user = auth()->user();
-        $tickets = TicketService::getTickets($user);
+        return view('tickets.index', [
+            'tickets' => TicketService::getTickets(auth()->user()),
+        ]);
+    }
 
-        return view('home', [
-            'tickets' => $tickets,
+    /**
+     * @param Ticket $ticket
+     *
+     * @return View
+     */
+    public function show(Ticket $ticket): View
+    {
+        return view('tickets.show',[
+            'ticket' => $ticket,
+            'ticketReplies' => $ticket->replies()->orderBy('id', 'desc')->get(),
         ]);
     }
 }

@@ -18,6 +18,11 @@ class Ticket extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function replies()
+    {
+        return $this->hasMany(Ticket::class, 'parent_id', 'id');
+    }
+
     public static function createTicket($ticketData)
     {
         // Only users can create tickets (admins can't)

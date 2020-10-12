@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,16 +15,17 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    if (Auth::check()) {
+        return redirect('tickets');
+    } else {
+        return view('welcome');
+    }
 });
 
 Auth::routes();
 
-//Route::group(['middleware' => 'auth'], function () {
-//    Route::get('/home', 'TicketController@index')->name('home');
-//});
-
-Route::get('/home', 'TicketController@index')->name('home');
+Route::get('/tickets', 'TicketController@index')->name('tickets');
+Route::get('/ticket/{ticket}', 'TicketController@show');
 
 Route::get('login/envato', 'Auth\LoginController@redirectToProvider');
 Route::get('login/envato/callback', 'Auth\LoginController@handleProviderCallback');

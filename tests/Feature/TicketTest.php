@@ -63,6 +63,7 @@ class TicketTest extends TestCase
         });
     }
 
+    // YADO: rename this test to reflect it's functionality
     public function testAdminCanSeeAllTickets()
     {
         // GIVEN
@@ -79,11 +80,12 @@ class TicketTest extends TestCase
         $tickets = TicketService::getTickets($admin);
 
         // THEN
-        // Only user's own tickets are visible
+        // Only user's own tickets are visible and admin replies
         $it = $this;
         $tickets->each(function ($ticket) use ($it, $admin) {
-            // Admin don't have own tickets
-            $it->assertNotEquals($ticket->user->id, $admin->id);
+            // Admin don't have own tickets but have replies
+            //$it->assertNotEquals($ticket->user->id, $admin->id);
+            $it->assertTrue(in_array($ticket->user_id, [$ticket->user->id, $admin->id]))  ;
         });
     }
 
@@ -160,5 +162,46 @@ class TicketTest extends TestCase
         );
     }
 
+    public function testNotLoggedInUserCantViewATicketAndIsRedirectedToLogin()
+    {
+        // GIVEN
+        // A user
+        $user = $this->getRandomUsers(1);
+        $this->loginUser($user);
+        // having a ticket
+        $ticket = Ticket::factory()->create([
+            'user_id' => $user->id,
+        ]);
+        // And user is not logged in
+        auth()->logout();
 
+        // WHEN
+        // User tries to view the ticket
+        $response = $this->get('/ticket/'.$ticket->id);
+
+        // THEN
+        // User sees 404 Not Found page
+        $response->assertRedirect('/login');
+    }
+
+    public function testLoggedInUserCanViewATicket()
+    {
+        // GIVEN
+        // A user
+        $user = $this->getRandomUsers(1);
+        $this->loginUser($user);
+        // having a ticket
+        $ticket = Ticket::factory()->create([
+            'user_id' => $user->id,
+        ]);
+
+        // WHEN
+        // User tries to view the ticket
+        $response = $this->get('/ticket/'.$ticket->id);
+
+        // THEN
+        // User sees 404 Not Found page
+        $response->assertStatus(200);
+        $response->assertSee($ticket->title);
+    }
 }
