@@ -10,7 +10,7 @@ class Ticket extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id', 'parent_id', 'title', 'body',
+        'user_id', 'title', 'body',
     ];
 
     public function user()
@@ -20,18 +20,19 @@ class Ticket extends Model
 
     public function replies()
     {
-        return $this->hasMany(Ticket::class, 'parent_id', 'id');
+        //return $this->hasMany(Ticket::class, 'parent_id', 'id');
+        return $this->hasMany(TicketReply::class);
     }
 
-    public static function createTicket($ticketData)
+    /*public static function createTicket($ticketData)
     {
         // Only users can create tickets (admins can't)
         if (auth()->user()->hasRole(User::ROLE_USER)) {
             return self::create($ticketData);
         }
-    }
+    }*/
 
-    public static function addTicketReply(Ticket $ticket, array $ticketData)
+    /*public static function addTicketReply(Ticket $ticket, array $ticketData)
     {
         // All users can create ticket replies
         // But only to own tickets
@@ -43,9 +44,9 @@ class Ticket extends Model
         } else {
             return null;
         }
-    }
+    }*/
 
-    public static function makeTicketReply(Ticket $ticket, array $ticketData)
+    /*public static function makeTicketReply(Ticket $ticket, array $ticketData)
     {
         // All users can create ticket replies
         // But only to own tickets
@@ -58,5 +59,5 @@ class Ticket extends Model
         } else {
             return null;
         }
-    }
+    }*/
 }
