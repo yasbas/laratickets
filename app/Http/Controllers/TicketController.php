@@ -44,4 +44,13 @@ class TicketController extends Controller
             'ticketReplies' => $ticket->replies()->orderBy('id', 'desc')->get(),
         ]);
     }
+
+    public function store(Ticket $ticket)
+    {
+        // YADO: Need to have the Ticket data and the reply data.
+        // YADO: And currently the form has only the reply data.
+        // YADO: So, add the ticket data.
+        // YAWARN: Also consider separating Ticket and TicketReply!
+        //Ticket::addTicketReply($ticket);
+    }
 }

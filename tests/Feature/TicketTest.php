@@ -39,6 +39,46 @@ class TicketTest extends TestCase
             ->get('/login');
     }
 
+    protected function createTicket(User $user)
+    {
+        //$this->loginUser($user);
+
+        $ticketTitle = Str::random(32);
+        $ticketBody = Str::random(128);
+        $ticketData = [
+            'user_id' => $user->id,
+            'parent_id' => 0,
+            'title' => $ticketTitle,
+            'body' => $ticketBody,
+        ];
+
+        return Ticket::createTicket($ticketData);
+    }
+
+    protected function addTicketReply(Ticket $ticket, User $user)
+    {
+        $replyBody = Str::random(128);
+        $ticketData = [
+            'user_id' => $user->id,
+            'parent_id' => $ticket->id,
+            'body' => $replyBody,
+        ];
+
+        return Ticket::addTicketReply($ticket, $ticketData);
+    }
+
+    protected function makeTicketReply(Ticket $ticket, User $user)
+    {
+        $replyBody = Str::random(128);
+        $ticketData = [
+            'user_id' => $user->id,
+            'parent_id' => $ticket->id,
+            'body' => $replyBody,
+        ];
+
+        return Ticket::makeTicketReply($ticket, $ticketData);
+    }
+
     public function testUserCanSeeOnlyOwnTickets()
     {
         // GIVEN
@@ -99,20 +139,7 @@ class TicketTest extends TestCase
 
         // WHEN
         // Creating ticket
-        $ticketTitle = Str::random(32);
-        $ticketBody = Str::random(128);
-        /*$user->tickets()->create([
-            'parent_id' => 0,
-            'title' => $ticketTitle,
-            'body' => $ticketBody,
-        ]);*/
-        $ticketData = [
-            'user_id' => $user->id,
-            'parent_id' => 0,
-            'title' => $ticketTitle,
-            'body' => $ticketBody,
-        ];
-        Ticket::createTicket($ticketData);
+        $ticket = $this->createTicket($user);
 
 
         // THEN
@@ -120,8 +147,8 @@ class TicketTest extends TestCase
         $this->assertEquals(
             1,
             $user->tickets()
-                ->where('title', $ticketTitle)
-                ->where('body', $ticketBody)
+                ->where('title', $ticket->title)
+                ->where('body', $ticket->body)
                 ->count()
         );
 
@@ -136,30 +163,11 @@ class TicketTest extends TestCase
 
         // WHEN
         // Creating a ticket
-        $ticketTitle = Str::random(32);
-        $ticketBody = Str::random(128);
-        /*$admin->tickets()->createTicket([
-            'parent_id' => 0,
-            'title' => $ticketTitle,
-            'body' => $ticketBody,
-        ]);*/
-        $ticketData = [
-            'user_id' => $admin->id,
-            'parent_id' => 0,
-            'title' => $ticketTitle,
-            'body' => $ticketBody,
-        ];
-        Ticket::createTicket($ticketData);
+        $ticket = $this->createTicket($admin);
 
         // THEN
         // Ticket is not created
-        $this->assertEquals(
-            0,
-            $admin->tickets()
-                 ->where('title', $ticketTitle)
-                 ->where('body', $ticketBody)
-                 ->count()
-        );
+        $this->assertNull($ticket);
     }
 
     public function testNotLoggedInUserCantViewATicketAndIsRedirectedToLogin()
@@ -169,9 +177,7 @@ class TicketTest extends TestCase
         $user = $this->getRandomUsers(1);
         $this->loginUser($user);
         // having a ticket
-        $ticket = Ticket::factory()->create([
-            'user_id' => $user->id,
-        ]);
+        $ticket = $this->createTicket($user);
         // And user is not logged in
         auth()->logout();
 
@@ -191,9 +197,7 @@ class TicketTest extends TestCase
         $user = $this->getRandomUsers(1);
         $this->loginUser($user);
         // having a ticket
-        $ticket = Ticket::factory()->create([
-            'user_id' => $user->id,
-        ]);
+        $ticket = $this->createTicket($user);
 
         // WHEN
         // User tries to view the ticket
@@ -203,5 +207,102 @@ class TicketTest extends TestCase
         // User sees 404 Not Found page
         $response->assertStatus(200);
         $response->assertSee($ticket->title);
+    }
+
+    public function testAdminCanAddReplyToATicket()
+    {
+        // GIVEN
+        // There are some tickets created by regular users
+        $user = $this->getRandomUsers(1);
+        $this->loginUser($user);
+        $ticket = $this->createTicket($user);
+        // And logged in as admin user
+        $admin = $this->getAdminUser();
+        $this->loginUser($admin);
+
+
+        // WHEN
+        // Admin creates a reply to a ticket
+        $ticketReply = $this->addTicketReply($ticket, $admin);
+
+
+        // THEN
+        // The reply is successfully created in database
+        $this->assertDatabaseHas('tickets', [
+            'id' => $ticketReply->id,
+            'user_id' => $admin->id,
+            'parent_id' => $ticket->id,
+            'body' => $ticketReply->body,
+        ]);
+    }
+
+    public function testUserCanAddReplyToOwnTicket()
+    {
+        // GIVEN
+        // There are some tickets created by regular users
+        $user = $this->getRandomUsers(1);
+        $this->loginUser($user);
+        $ticket = $this->createTicket($user);
+
+
+        // WHEN
+        // User creates a reply to the ticket
+        $ticketReply = $this->addTicketReply($ticket, $user);
+
+
+        // THEN
+        // The reply is successfully created in database
+        $this->assertDatabaseHas('tickets', [
+            'id' => $ticketReply->id,
+            'user_id' => $user->id,
+            'parent_id' => $ticket->id,
+            'body' => $ticketReply->body,
+        ]);
+
+    }
+
+    public function testUserCantAddReplyToNotOwnTicket()
+    {
+        // GIVEN
+        // There are some tickets created by regular users
+        $user1 = $this->getRandomUsers(1);
+        $this->loginUser($user1);
+        $user1Ticket = $this->createTicket($user1);
+
+        $user2 = $this->getRandomUsers(1);
+        $this->loginUser($user2);
+
+
+
+        // WHEN
+        // Another User tries to create a reply to the ticket
+        $ticketReply = $this->addTicketReply($user1Ticket, $user2);
+
+
+        // THEN
+        // The reply is not created
+        $this->assertNull($ticketReply);
+    }
+
+    public function testUserCanPostTicketReply()
+    {
+        // GIVEN
+        // A user has created a ticket
+        $user = $this->getRandomUsers(1);
+        $this->loginUser($user);
+        $ticket = $this->createTicket($user);
+
+
+        // WHEN
+        // User try to post a ticket reply via the web form
+        //$this->addTicketReply($ticket, $user);
+        $ticketReply = $this->makeTicketReply($ticket, $user);
+        $this->post('/ticket/'.$ticket->id, $ticketReply->toArray());
+
+
+        // THEN
+        // The reply is successfully added to ticket
+        $this->get('/ticket/'.$ticket->id)
+            ->assertSee($ticketReply->body);
     }
 }
