@@ -9,7 +9,14 @@
 
 
                     <div class="card-body">
-                        [Ticket Action Buttons Here (Reply | Note | Customer Note)]
+                        <form action="/ticket/{{ $ticket->id }}" method="POST" >
+                            [Ticket Action Buttons Here (Reply | Note | Customer Note)]
+                            {{ csrf_field() }}
+                            <div class="form-group">
+                                <textarea name="body" id="body" class="form-control" placeholder="Write your reply..." rows="5"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Add Reply</button>
+                        </form>
                         <hr>
 
                         @if (session('status'))

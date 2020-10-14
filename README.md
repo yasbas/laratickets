@@ -237,3 +237,6 @@ Add the Envato login button:
 </a>
 
 ```
+
+## Code restrictions
+ - Create/make tickets only via TicketService::createTicket()

@@ -10,7 +10,7 @@ class Ticket extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id', 'parent_id', 'title', 'body',
+        'user_id', 'title', 'body',
     ];
 
     public function user()
@@ -20,14 +20,6 @@ class Ticket extends Model
 
     public function replies()
     {
-        return $this->hasMany(Ticket::class, 'parent_id', 'id');
-    }
-
-    public static function createTicket($ticketData)
-    {
-        // Only users can create tickets (admins can't)
-        if (auth()->user()->hasRole(User::ROLE_USER)) {
-            self::create($ticketData);
-        }
+        return $this->hasMany(TicketReply::class);
     }
 }

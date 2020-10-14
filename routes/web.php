@@ -26,6 +26,7 @@ Auth::routes();
 
 Route::get('/tickets', 'TicketController@index')->name('tickets');
 Route::get('/ticket/{ticket}', 'TicketController@show');
+Route::post('/ticket/{ticket}', 'TicketController@store');
 
 Route::get('login/envato', 'Auth\LoginController@redirectToProvider');
 Route::get('login/envato/callback', 'Auth\LoginController@handleProviderCallback');
