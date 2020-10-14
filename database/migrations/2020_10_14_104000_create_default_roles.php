@@ -15,6 +15,7 @@ class CreateDefaultRoles extends Migration
     public function up()
     {
         Role::create(['name' => 'admin']);
+        Role::create(['name' => 'support_agent']);
         Role::create(['name' => 'user']);
     }
 

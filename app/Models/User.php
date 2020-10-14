@@ -16,6 +16,7 @@ class User extends Authenticatable
     use HasFactory;
     // Roles
     const ROLE_ADMIN = 'admin';
+    const ROLE_SUPPORT_AGENT = 'support_agent';
     const ROLE_USER = 'user';
     // Login providers
     const LOGIN_PROVIDER_ENVATO = 'envato';
