@@ -24,9 +24,30 @@ class UsersSeeder extends Seeder
         $adminUser->assignRole(User::ROLE_ADMIN);
 
         // Create normal users
-        User::factory()->times(50)->create()->each(function ($user) {
+        User::factory()->times(150)->create()->each(function ($user) {
             // Random add ADMIN role for like 10% of the users
-            $role = rand(1, 10) == 1 ? User::ROLE_ADMIN : User::ROLE_USER;
+            //$role = rand(1, 10) == 1 ? User::ROLE_ADMIN : User::ROLE_USER;
+            $rolesRandomize = [
+                User::ROLE_ADMIN,
+                User::ROLE_SUPPORT_AGENT,
+                User::ROLE_SUPPORT_AGENT,
+                User::ROLE_SUPPORT_AGENT,
+                User::ROLE_USER,
+                User::ROLE_USER,
+                User::ROLE_USER,
+                User::ROLE_USER,
+                User::ROLE_USER,
+                User::ROLE_USER,
+                User::ROLE_USER,
+                User::ROLE_USER,
+                User::ROLE_USER,
+                User::ROLE_USER,
+                User::ROLE_USER,
+                User::ROLE_USER,
+            ];
+
+            $role = $rolesRandomize[rand(0, count($rolesRandomize)-1)];
+
             $user->assignRole($role);
         });
     }
