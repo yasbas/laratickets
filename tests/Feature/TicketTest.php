@@ -23,14 +23,14 @@ class TicketTest extends TestCase
         $this->seed(DatabaseSeeder::class);
     }
 
-    protected function getRandomUsers($count=1)
+    protected function getRandomUser()
     {
-        return User::inRandomOrder()->where('id', '>', 1)->limit($count)->first();
+        return User::inRandomOrder()->role(User::ROLE_USER)->first();
     }
 
-    protected function getAdminUser()
+    protected function getRandomAdminUser()
     {
-        return User::find(1);
+        return User::inRandomOrder()->role(User::ROLE_ADMIN)->first();
     }
 
     protected function loginUser($user)
@@ -39,51 +39,40 @@ class TicketTest extends TestCase
             ->get('/login');
     }
 
-    protected function createTicket(User $user)
+    protected function createTicket()
     {
-        //$this->loginUser($user);
-
+        $user = auth()->user();
         $ticketTitle = Str::random(32);
         $ticketBody = Str::random(128);
         $ticketData = [
             'user_id' => $user->id,
-            'parent_id' => 0,
             'title' => $ticketTitle,
             'body' => $ticketBody,
         ];
 
-        return Ticket::createTicket($ticketData);
+        //return Ticket::create($ticketData);
+        return TicketService::createTicket($ticketData);
     }
 
-    protected function addTicketReply(Ticket $ticket, User $user)
+    protected function addTicketReply(Ticket $ticket)
     {
-        $replyBody = Str::random(128);
-        $ticketData = [
-            'user_id' => $user->id,
-            'parent_id' => $ticket->id,
-            'body' => $replyBody,
-        ];
+        $reply = Str::random(128);
 
-        return Ticket::addTicketReply($ticket, $ticketData);
+        return TicketService::addTicketReply($ticket, $reply);
     }
 
-    protected function makeTicketReply(Ticket $ticket, User $user)
+    protected function makeTicketReply(Ticket $ticket)
     {
-        $replyBody = Str::random(128);
-        $ticketData = [
-            'user_id' => $user->id,
-            'parent_id' => $ticket->id,
-            'body' => $replyBody,
-        ];
+        $reply = Str::random(128);
 
-        return Ticket::makeTicketReply($ticket, $ticketData);
+        return TicketService::makeTicketReply($ticket, $reply);
     }
 
     public function testUserCanSeeOnlyOwnTickets()
     {
         // GIVEN
         // A (non-admin) user is logged in
-        $user = $this->getRandomUsers(1);
+        $user = $this->getRandomUser();
         $this->loginUser($user);
         $this->assertAuthenticatedAs($user);
         $this->assertFalse($user->hasRole(User::ROLE_ADMIN));
@@ -103,12 +92,11 @@ class TicketTest extends TestCase
         });
     }
 
-    // YADO: rename this test to reflect it's functionality
-    public function testAdminCanSeeAllTickets()
+    public function testAdminCanSeeAllTicketsButCantOwnATicket()
     {
         // GIVEN
         // An admin user is logged in
-        $admin = $this->getAdminUser();
+        $admin = $this->getRandomAdminUser();
         $this->loginUser($admin);
         $this->assertAuthenticatedAs($admin);
         $this->assertFalse($admin->hasRole(User::ROLE_USER));
@@ -120,12 +108,15 @@ class TicketTest extends TestCase
         $tickets = TicketService::getTickets($admin);
 
         // THEN
-        // Only user's own tickets are visible and admin replies
+        // All tickets are loaded
+        $this->assertEquals($tickets->count(), Ticket::count());
+
         $it = $this;
         $tickets->each(function ($ticket) use ($it, $admin) {
-            // Admin don't have own tickets but have replies
-            //$it->assertNotEquals($ticket->user->id, $admin->id);
-            $it->assertTrue(in_array($ticket->user_id, [$ticket->user->id, $admin->id]))  ;
+            // And all tickets belong to users
+            $it->assertTrue($ticket->user->hasRole(User::ROLE_USER));
+            // And no ticket belongs to admin
+            $it->assertFalse($ticket->user->hasRole(User::ROLE_ADMIN));
         });
     }
 
@@ -133,13 +124,13 @@ class TicketTest extends TestCase
     {
         // GIVEN
         // Logged in user, non-admin
-        $user = $this->getRandomUsers(1);
+        $user = $this->getRandomUser();
         $this->loginUser($user);
 
 
         // WHEN
         // Creating ticket
-        $ticket = $this->createTicket($user);
+        $ticket = $this->createTicket();
 
 
         // THEN
@@ -151,19 +142,18 @@ class TicketTest extends TestCase
                 ->where('body', $ticket->body)
                 ->count()
         );
-
     }
 
     public function testAdminCantCreateTicket()
     {
         // GIVEN
         // Logged in admin user
-        $admin = $this->getAdminUser();
+        $admin = $this->getRandomAdminUser();
         $this->loginUser($admin);
 
         // WHEN
         // Creating a ticket
-        $ticket = $this->createTicket($admin);
+        $ticket = $this->createTicket();
 
         // THEN
         // Ticket is not created
@@ -174,10 +164,10 @@ class TicketTest extends TestCase
     {
         // GIVEN
         // A user
-        $user = $this->getRandomUsers(1);
+        $user = $this->getRandomUser();
         $this->loginUser($user);
         // having a ticket
-        $ticket = $this->createTicket($user);
+        $ticket = $this->createTicket();
         // And user is not logged in
         auth()->logout();
 
@@ -190,14 +180,14 @@ class TicketTest extends TestCase
         $response->assertRedirect('/login');
     }
 
-    public function testLoggedInUserCanViewATicket()
+    public function testLoggedInUserCanViewOwnTicket()
     {
         // GIVEN
         // A user
-        $user = $this->getRandomUsers(1);
+        $user = $this->getRandomUser();
         $this->loginUser($user);
         // having a ticket
-        $ticket = $this->createTicket($user);
+        $ticket = $this->createTicket();
 
         // WHEN
         // User tries to view the ticket
@@ -213,25 +203,24 @@ class TicketTest extends TestCase
     {
         // GIVEN
         // There are some tickets created by regular users
-        $user = $this->getRandomUsers(1);
+        $user = $this->getRandomUser();
         $this->loginUser($user);
-        $ticket = $this->createTicket($user);
+        $ticket = $this->createTicket();
         // And logged in as admin user
-        $admin = $this->getAdminUser();
+        $admin = $this->getRandomAdminUser();
         $this->loginUser($admin);
 
 
         // WHEN
         // Admin creates a reply to a ticket
-        $ticketReply = $this->addTicketReply($ticket, $admin);
+        $ticketReply = $this->addTicketReply($ticket);
 
 
         // THEN
         // The reply is successfully created in database
-        $this->assertDatabaseHas('tickets', [
+        $this->assertDatabaseHas('ticket_replies', [
             'id' => $ticketReply->id,
             'user_id' => $admin->id,
-            'parent_id' => $ticket->id,
             'body' => $ticketReply->body,
         ]);
     }
@@ -240,43 +229,41 @@ class TicketTest extends TestCase
     {
         // GIVEN
         // There are some tickets created by regular users
-        $user = $this->getRandomUsers(1);
+        $user = $this->getRandomUser();
         $this->loginUser($user);
-        $ticket = $this->createTicket($user);
+        $ticket = $this->createTicket();
 
 
         // WHEN
         // User creates a reply to the ticket
-        $ticketReply = $this->addTicketReply($ticket, $user);
+        $ticketReply = $this->addTicketReply($ticket);
 
 
         // THEN
         // The reply is successfully created in database
-        $this->assertDatabaseHas('tickets', [
+        $this->assertDatabaseHas('ticket_replies', [
             'id' => $ticketReply->id,
             'user_id' => $user->id,
-            'parent_id' => $ticket->id,
             'body' => $ticketReply->body,
         ]);
-
     }
 
     public function testUserCantAddReplyToNotOwnTicket()
     {
         // GIVEN
         // There are some tickets created by regular users
-        $user1 = $this->getRandomUsers(1);
+        $user1 = $this->getRandomUser();
         $this->loginUser($user1);
-        $user1Ticket = $this->createTicket($user1);
+        $user1Ticket = $this->createTicket();
 
-        $user2 = $this->getRandomUsers(1);
+        $user2 = $this->getRandomUser();
         $this->loginUser($user2);
 
 
 
         // WHEN
         // Another User tries to create a reply to the ticket
-        $ticketReply = $this->addTicketReply($user1Ticket, $user2);
+        $ticketReply = $this->addTicketReply($user1Ticket);
 
 
         // THEN
@@ -288,15 +275,15 @@ class TicketTest extends TestCase
     {
         // GIVEN
         // A user has created a ticket
-        $user = $this->getRandomUsers(1);
+        $user = $this->getRandomUser();
         $this->loginUser($user);
-        $ticket = $this->createTicket($user);
+        $ticket = $this->createTicket();
 
 
         // WHEN
         // User try to post a ticket reply via the web form
         //$this->addTicketReply($ticket, $user);
-        $ticketReply = $this->makeTicketReply($ticket, $user);
+        $ticketReply = $this->makeTicketReply($ticket);
         $this->post('/ticket/'.$ticket->id, $ticketReply->toArray());
 
 

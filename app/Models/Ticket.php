@@ -20,44 +20,6 @@ class Ticket extends Model
 
     public function replies()
     {
-        //return $this->hasMany(Ticket::class, 'parent_id', 'id');
         return $this->hasMany(TicketReply::class);
     }
-
-    /*public static function createTicket($ticketData)
-    {
-        // Only users can create tickets (admins can't)
-        if (auth()->user()->hasRole(User::ROLE_USER)) {
-            return self::create($ticketData);
-        }
-    }*/
-
-    /*public static function addTicketReply(Ticket $ticket, array $ticketData)
-    {
-        // All users can create ticket replies
-        // But only to own tickets
-        if (($ticket->user->id == auth()->user()->id ||
-             auth()->user()->hasRole(User::ROLE_ADMIN))
-        ) {
-
-            return self::create($ticketData);
-        } else {
-            return null;
-        }
-    }*/
-
-    /*public static function makeTicketReply(Ticket $ticket, array $ticketData)
-    {
-        // All users can create ticket replies
-        // But only to own tickets
-        if (($ticket->user->id == auth()->user()->id ||
-             auth()->user()->hasRole(User::ROLE_ADMIN))
-        )
-        {
-
-            return self::make($ticketData);
-        } else {
-            return null;
-        }
-    }*/
 }
