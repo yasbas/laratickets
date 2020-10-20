@@ -26,8 +26,9 @@ Auth::routes();
 
 Route::get('/tickets', 'TicketController@index')->name('tickets.index');
 Route::get('/tickets/create', 'TicketController@create')->name('tickets.create');
-Route::get('/tickets/{ticket}', 'TicketController@show');
+Route::get('/tickets/{ticket}', 'TicketController@show')->name('tickets.show');
 Route::post('/tickets/store', 'TicketController@store')->name('tickets.store');
+Route::post('/tickets/{ticket}', 'TicketController@storeReply')->name('tickets.store.reply');
 
 Route::get('login/envato', 'Auth\LoginController@redirectToProvider');
 Route::get('login/envato/callback', 'Auth\LoginController@handleProviderCallback');
