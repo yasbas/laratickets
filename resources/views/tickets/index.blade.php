@@ -14,17 +14,11 @@
                         </div>
                     @endif
 
-{{--                    {{ __('You are logged in!') }}--}}
-{{--                    @role('admin')--}}
-{{--                        {{ __('As admin') }}--}}
-{{--                    @endrole--}}
-{{--                    @role('user')--}}
-{{--                        {{ __('As user') }}--}}
-{{--                    @endrole--}}
+                        <a href="{{ route('tickets.create') }}" class="btn btn-primary">Create a New Ticket</a>
 
                     @foreach($tickets as $ticket)
                         <p>
-                            <a href="/ticket/{{ $ticket->id }}">
+                            <a href="/tickets/{{ $ticket->id }}">
                                 {{ $ticket->title }}
                             </a>
                         </p>

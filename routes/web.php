@@ -24,9 +24,10 @@ Route::get('/', function () {
 
 Auth::routes();
 
-Route::get('/tickets', 'TicketController@index')->name('tickets');
-Route::get('/ticket/{ticket}', 'TicketController@show');
-Route::post('/ticket/{ticket}', 'TicketController@store');
+Route::get('/tickets', 'TicketController@index')->name('tickets.index');
+Route::get('/tickets/create', 'TicketController@create')->name('tickets.create');
+Route::get('/tickets/{ticket}', 'TicketController@show');
+Route::post('/tickets/store', 'TicketController@store')->name('tickets.store');
 
 Route::get('login/envato', 'Auth\LoginController@redirectToProvider');
 Route::get('login/envato/callback', 'Auth\LoginController@handleProviderCallback');
