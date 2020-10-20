@@ -144,6 +144,81 @@ class TicketTest extends TestCase
         );
     }
 
+    public function testUserCanCreateTicket2()
+    {
+        // GIVEN
+        // Logged in user, non-admin
+        auth()->logout();
+        $this->get('/login')
+            ->assertSee('Login');
+        $user = $this->getRandomUser();
+        $this->post('/login', [
+            'email' => $user->email,
+            'password' => '123456',
+        ])
+             ->assertRedirect('/tickets');
+
+        $this->get('/tickets')
+            ->assertSee('Dashboard')
+            ->assertSee('Create a New Ticket');
+
+
+
+        // WHEN
+        // Creating ticket
+        $this->get(route('tickets.create'))
+            ->assertSee('Submit Ticket');
+
+        $ticketTitle = Str::random(32);
+        $ticketBody = Str::random(128);
+        $this->post(route('tickets.store'), [
+            'title' => $ticketTitle,
+            'body' => $ticketBody,
+        ]);
+
+        // THEN
+        // Ticket is created successfully
+        $this->get(route('tickets.index'))
+             ->assertSee($ticketTitle);
+    }
+
+    public function testUserCantCreateTicketMissingTitleAndBody()
+    {
+        // GIVEN
+        // Logged in user, non-admin
+        auth()->logout();
+        $this->get('/login')
+             ->assertSee('Login');
+        $user = $this->getRandomUser();
+        $this->post('/login', [
+            'email' => $user->email,
+            'password' => '123456',
+        ])
+             ->assertRedirect('/tickets');
+
+        $this->get('/tickets')
+             ->assertSee('Dashboard')
+             ->assertSee('Create a New Ticket');
+
+
+
+        // WHEN
+        // Creating ticket with missing title and body
+        $this->get(route('tickets.create'))
+             ->assertSee('Submit Ticket');
+
+        $response = $this->post(route('tickets.store'), [
+            'title' => '',
+            'body' => '',
+        ])
+        // THEN
+        // Errors show
+            ->assertRedirect(route('tickets.create'))
+            ->assertSessionHasErrors(
+                ['title', 'body']
+            );
+    }
+
     public function testAdminCantCreateTicket()
     {
         // GIVEN
@@ -173,7 +248,7 @@ class TicketTest extends TestCase
 
         // WHEN
         // User tries to view the ticket
-        $response = $this->get('/ticket/'.$ticket->id);
+        $response = $this->get('/tickets/'.$ticket->id);
 
         // THEN
         // User sees 404 Not Found page
@@ -191,7 +266,7 @@ class TicketTest extends TestCase
 
         // WHEN
         // User tries to view the ticket
-        $response = $this->get('/ticket/'.$ticket->id);
+        $response = $this->get('/tickets/'.$ticket->id);
 
         // THEN
         // User sees 404 Not Found page
