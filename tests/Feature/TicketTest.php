@@ -359,12 +359,12 @@ class TicketTest extends TestCase
         // User try to post a ticket reply via the web form
         //$this->addTicketReply($ticket, $user);
         $ticketReply = $this->makeTicketReply($ticket);
-        $this->post('/ticket/'.$ticket->id, $ticketReply->toArray());
+        $this->post('/tickets/'.$ticket->id, $ticketReply->toArray());
 
 
         // THEN
         // The reply is successfully added to ticket
-        $this->get('/ticket/'.$ticket->id)
+        $this->get('/tickets/'.$ticket->id)
             ->assertSee($ticketReply->body);
     }
 }
