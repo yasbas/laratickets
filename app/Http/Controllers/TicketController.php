@@ -7,7 +7,9 @@ use App\Models\Ticket;
 use Illuminate\Contracts\Support\Renderable as RenderableAlias;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
+use function Psy\debug;
 
 class TicketController extends Controller
 {
@@ -69,5 +71,27 @@ class TicketController extends Controller
         );
 
         return redirect()->route('tickets.index');
+    }
+
+    public function storeReply(Ticket $ticket)
+    {
+        request()->validate([
+            'body' => ['required', 'min:2'],
+        ]);
+
+        if ($ticket) {
+            TicketService::addTicketReply(
+                $ticket,
+                request()->body
+            );
+        } else {
+            // YADO: Log and throw an exception
+            Log::error('Ticket not found, id: '.$ticket->id);
+        }
+
+
+        return redirect()->route('tickets.show', [
+            'ticket' => $ticket->id
+        ]);
     }
 }

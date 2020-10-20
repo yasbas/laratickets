@@ -1,8 +1,8 @@
 <hr>
 <strong>{{ $reply->user->name }} </strong>
 <span>
-    @if($reply->parent_id==0)
-        conversation started
+    @if($reply->title)
+        started conversation
     @else
         replied
     @endif

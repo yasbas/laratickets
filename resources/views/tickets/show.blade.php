@@ -9,7 +9,7 @@
 
 
                     <div class="card-body">
-                        <form action="/ticket/{{ $ticket->id }}" method="POST" >
+                        <form action="/tickets/{{ $ticket->id }}" method="POST" >
                             [Ticket Action Buttons Here (Reply | Note | Customer Note)]
                             {{ csrf_field() }}
                             <div class="form-group">
