@@ -14,7 +14,9 @@
                         </div>
                     @endif
 
+                    @role('user')
                         <a href="{{ route('tickets.create') }}" class="btn btn-primary">Create a New Ticket</a>
+                    @endrole
 
                     @foreach($tickets as $ticket)
                         <p>

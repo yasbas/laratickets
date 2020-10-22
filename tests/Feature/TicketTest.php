@@ -219,7 +219,7 @@ class TicketTest extends TestCase
             );
     }
 
-    public function testAdminCantCreateTicket()
+    public function testAdminCantCreateTicketUnitTest()
     {
         // GIVEN
         // Logged in admin user
@@ -233,6 +233,30 @@ class TicketTest extends TestCase
         // THEN
         // Ticket is not created
         $this->assertNull($ticket);
+    }
+
+    public function testAdminCantCreateTicketFeatureTest()
+    {
+        // GIVEN
+        // Logged in admin user
+        auth()->logout();
+        $this->get('/login')
+             ->assertSee('Login');
+        $admin = $this->getRandomAdminUser();
+        $this->post('/login', [
+            'email' => $admin->email,
+            'password' => '123456',
+        ])
+             ->assertRedirect('/tickets');
+
+
+        // WHEN
+        // Load tickets index
+        // THEN
+        // The button "Create ticket" is not available
+        $this->get('/tickets')
+             ->assertSee('Dashboard')
+             ->assertDontSee('Create a New Ticket');
     }
 
     public function testNotLoggedInUserCantViewATicketAndIsRedirectedToLogin()
@@ -367,4 +391,5 @@ class TicketTest extends TestCase
         $this->get('/tickets/'.$ticket->id)
             ->assertSee($ticketReply->body);
     }
+
 }

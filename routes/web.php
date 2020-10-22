@@ -25,7 +25,11 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::get('/tickets', 'TicketController@index')->name('tickets.index');
-Route::get('/tickets/create', 'TicketController@create')->name('tickets.create');
+
+Route::group(['middleware' => ['role:user']], function () {
+    Route::get('/tickets/create', 'TicketController@create')->name('tickets.create');
+});
+
 Route::get('/tickets/{ticket}', 'TicketController@show')->name('tickets.show');
 Route::post('/tickets/store', 'TicketController@store')->name('tickets.store');
 Route::post('/tickets/{ticket}', 'TicketController@storeReply')->name('tickets.store.reply');
