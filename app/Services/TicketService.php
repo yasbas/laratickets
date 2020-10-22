@@ -10,10 +10,10 @@ class TicketService {
 
     public static function getTickets(User $user)
     {
-        $isAdmin = $user->hasRole(User::ROLE_ADMIN);
+        $canSeeAllTickets = $user->hasRole(User::ROLE_ADMIN) || $user->hasRole(User::ROLE_SUPPORT_AGENT);
 
         // YADO: Make it get user's tickets only if role is USER
-        return $isAdmin ? Ticket::all() : $user->tickets()->orderBy('updated_at')->get();
+        return $canSeeAllTickets ? Ticket::all() : $user->tickets()->orderBy('updated_at')->get();
     }
 
     public static function createTicket(array $ticketData)
