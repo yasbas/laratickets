@@ -33,6 +33,11 @@ class TicketTest extends TestCase
         return User::inRandomOrder()->role(User::ROLE_ADMIN)->first();
     }
 
+    protected function getRandomSupportAgentUser()
+    {
+        return User::inRandomOrder()->role(User::ROLE_SUPPORT_AGENT)->first();
+    }
+
     protected function loginUser($user)
     {
         $this->actingAs($user)
@@ -94,6 +99,8 @@ class TicketTest extends TestCase
 
     public function testAdminCanSeeAllTicketsButCantOwnATicket()
     {
+        // YADO: Refactor this in two tests, to check separately if admin user can view all tickets and if can't own a
+        // YADO: ticket
         // GIVEN
         // An admin user is logged in
         $admin = $this->getRandomAdminUser();
@@ -118,6 +125,25 @@ class TicketTest extends TestCase
             // And no ticket belongs to admin
             $it->assertFalse($ticket->user->hasRole(User::ROLE_ADMIN));
         });
+    }
+
+    public function testSupportAgentCanSeeAllTickets()
+    {
+        // GIVEN
+        // An admin user is logged in
+        $supportAgent = $this->getRandomSupportAgentUser();
+        $this->loginUser($supportAgent);
+        $this->assertAuthenticatedAs($supportAgent);
+        $this->assertTrue($supportAgent->hasRole(User::ROLE_SUPPORT_AGENT));
+
+
+        // WHEN
+        // Load tickets list
+        $tickets = TicketService::getTickets($supportAgent);
+
+        // THEN
+        // All tickets are loaded
+        $this->assertEquals($tickets->count(), Ticket::count());
     }
 
     public function testUserCanCreateTicket()
