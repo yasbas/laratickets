@@ -16,6 +16,7 @@ class CreateTicketsTable extends Migration
         Schema::create('tickets', function (Blueprint $table) {
             $table->id();
             $table->integer('user_id')->comment('The ticket creator');
+            $table->integer('assigned_agent_id')->nullable()->comment('The SupportAgent user, ssigned to this ticket');
             $table->string('title')->nullable();
             $table->string('body');
             $table->timestamps();
