@@ -107,7 +107,7 @@ class TicketController extends Controller
     // YADO: After MVP, move this to API
     public function assignSupportAgents(Ticket $ticket, User $supportAgent)
     {
-        TicketService::assignSupportAgentToTicket($ticket, $supportAgent);
+        TicketService::assignSupportAgentToTicket($supportAgent, $ticket);
 
         return 'OK';
     }
