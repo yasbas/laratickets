@@ -33,6 +33,22 @@
                     </div>
                 </div>
             </div>
+            @hasanyrole('support_agent|admin')
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">Actions</div>
+                    <div class="card-body">
+                        @role('admin')
+                        <assign-support-agent-dropdown
+                            :ticket-id="{{ $ticket->id }}"
+                            :assigned-support-agent-id="{{ $ticket->assignedSupportAgent->id ?? -1 }}"
+                        ></assign-support-agent-dropdown>
+                        @endrole
+
+                    </div>
+                </div>
+            </div>
+            @endhasanyrole
         </div>
     </div>
 @endsection

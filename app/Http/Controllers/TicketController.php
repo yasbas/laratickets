@@ -2,14 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Services\TicketService;
 use App\Models\Ticket;
-use Illuminate\Contracts\Support\Renderable as RenderableAlias;
-use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
-use function Psy\debug;
 
 class TicketController extends Controller
 {
@@ -45,6 +43,7 @@ class TicketController extends Controller
         return view('tickets.show',[
             'ticket' => $ticket,
             'ticketReplies' => $ticket->replies()->orderBy('id', 'desc')->get(),
+            'supportAgents' => User::role(User::ROLE_SUPPORT_AGENT)->orderBy('name')->get(),
         ]);
     }
 
@@ -93,5 +92,23 @@ class TicketController extends Controller
         return redirect()->route('tickets.show', [
             'ticket' => $ticket->id
         ]);
+    }
+
+    // YADO: After MVP, move this to API
+    public function getSupportAgents()
+    {
+        return User::role(User::ROLE_SUPPORT_AGENT)
+                   ->orderBy('name')
+                   ->select(['id', 'name'])
+                   ->get()
+                   ->toJson();
+    }
+
+    // YADO: After MVP, move this to API
+    public function assignSupportAgents(Ticket $ticket, User $supportAgent)
+    {
+        TicketService::assignSupportAgentToTicket($supportAgent, $ticket);
+
+        return 'OK';
     }
 }

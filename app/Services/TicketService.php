@@ -62,4 +62,15 @@ class TicketService {
         }
     }
 
+    public static function assignSupportAgentToTicket(User $supportAgent, Ticket $ticket)
+    {
+        // Only admin can assign tickets, currently
+        if (auth()->user()->hasRole(User::ROLE_ADMIN) &&
+            $supportAgent->hasRole(User::ROLE_SUPPORT_AGENT)
+        ) {
+            $ticket->assigned_agent_id = $supportAgent->id;
+            $ticket->save();
+        }
+    }
+
 }
