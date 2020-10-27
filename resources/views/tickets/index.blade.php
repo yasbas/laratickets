@@ -23,6 +23,10 @@
                             <a href="/tickets/{{ $ticket->id }}">
                                 {{ $ticket->title }}
                             </a>
+                            <br>
+                            @if ($ticket->assignedSupportAgent)
+                            <span>Assigned to {{  $ticket->assignedSupportAgent->name }}</span>
+                            @endif
                         </p>
                     @endforeach
 
