@@ -28,10 +28,14 @@ class TicketService {
 
     public static function addTicketReply(Ticket $ticket, string $reply)
     {
-        // All users can create ticket replies to own tickets
-        // Admin users can create replies to all tickets
-        if (($ticket->user->id == auth()->user()->id ||
-             auth()->user()->hasRole(User::ROLE_ADMIN))
+        if (
+            // All users can create ticket replies to own tickets
+            $ticket->user->id == auth()->user()->id ||
+            // Admin users can create replies to all tickets
+            auth()->user()->hasRole(User::ROLE_ADMIN) ||
+            // Assigned to ticket SupportAgents can create replies to the ticket
+            (isset($ticket->assignedSupportAgent) && auth()->user()->id == $ticket->assignedSupportAgent->id)
+
         ) {
 
             return TicketReply::create([
