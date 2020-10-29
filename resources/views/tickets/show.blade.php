@@ -9,20 +9,22 @@
 
 
                     <div class="card-body">
-                        <form action="/tickets/{{ $ticket->id }}" method="POST" >
-                            [Ticket Action Buttons Here (Reply | Note | Customer Note)]
-                            {{ csrf_field() }}
-                            <div class="form-group">
-                                <textarea name="body" id="body" class="form-control" placeholder="Write your reply..." rows="5"></textarea>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Add Reply</button>
-                        </form>
-                        <hr>
+                        @if(auth()->user()->hasRole(\App\Models\User::ROLE_ADMIN) || auth()->user()->id == $ticket->user->id || (auth()->user()->hasRole(\App\Models\User::ROLE_SUPPORT_AGENT) && $ticket->assignedSupportAgent && auth()->user()->id == $ticket->assignedSupportAgent->id))
+                            <form action="/tickets/{{ $ticket->id }}" method="POST" >
+                                [Ticket Action Buttons Here (Reply | Note | Customer Note)]
+                                {{ csrf_field() }}
+                                <div class="form-group">
+                                    <textarea name="body" id="body" class="form-control" placeholder="Write your reply..." rows="5"></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Add Reply</button>
+                            </form>
+                            <hr>
 
-                        @if (session('status'))
-                            <div class="alert alert-success" role="alert">
-                                {{ session('status') }}
-                            </div>
+                            @if (session('status'))
+                                <div class="alert alert-success" role="alert">
+                                    {{ session('status') }}
+                                </div>
+                            @endif
                         @endif
 
                         @foreach($ticketReplies as $reply)

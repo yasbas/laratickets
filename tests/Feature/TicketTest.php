@@ -28,6 +28,11 @@ class TicketTest extends TestCase
         return User::inRandomOrder()->role(User::ROLE_USER)->first();
     }
 
+    protected function getDifferentRandomUser(User $user)
+    {
+        return User::inRandomOrder()->role(User::ROLE_USER)->where('id', '<>', $user->id)->first();
+    }
+
     protected function getRandomAdminUser()
     {
         return User::inRandomOrder()->role(User::ROLE_ADMIN)->first();
@@ -36,6 +41,11 @@ class TicketTest extends TestCase
     protected function getRandomSupportAgentUser()
     {
         return User::inRandomOrder()->role(User::ROLE_SUPPORT_AGENT)->first();
+    }
+
+    protected function getDifferentRandomSupportAgentUser($supportAgent)
+    {
+        return User::inRandomOrder()->role(User::ROLE_SUPPORT_AGENT)->where('id', '<>', $supportAgent->id)->first();
     }
 
     protected function loginUser($user)
@@ -73,7 +83,7 @@ class TicketTest extends TestCase
         return TicketService::makeTicketReply($ticket, $reply);
     }
 
-    public function testUserCanSeeOnlyOwnTickets()
+    public function testUserCanSeeOnlyOwnTicketsList()
     {
         // GIVEN
         // A (non-admin) user is logged in
@@ -95,6 +105,130 @@ class TicketTest extends TestCase
         $tickets->each(function ($ticket) use ($it, $user) {
             $it->assertEquals($ticket->user->id, $user->id);
         });
+    }
+
+    public function testUserCanSeeTicketReplyFormInOwnTickets()
+    {
+        // GIVEN
+        // A user
+        $user = $this->getRandomUser();
+        // Who is logged in
+        $this->loginUser($user);
+        // And have a ticket
+        $ticket = $this->createTicket();
+
+
+        // WHEN
+        // The user loads the ticket thread
+        $this->get(route('tickets.show', ['ticket' => $ticket->id]))
+        // THEN
+            // The user can see the reply form
+            ->assertSee('Add Reply');
+    }
+
+    public function testUserCantSeeOtherUsersTicketThread()
+    {
+        // GIVEN
+        // A user
+        $user = $this->getRandomUser();
+        // And another user
+        $anotherUser = $this->getDifferentRandomUser($user);
+        // with a ticket
+        $this->loginUser($anotherUser);
+        $ticketOfAnotherUser = $this->createTicket();
+
+
+        // WHEN
+        // The user logs in
+        $this->loginUser($user);
+        // And tries to load the ticket thread of anotherUser
+        $this->get(route('tickets.show', ['ticket' => $ticketOfAnotherUser->id]))
+            // THEN
+            // The user see 404
+             ->assertStatus(404);
+    }
+
+    public function testSupportAgentCanSeeTicketReplyFormInAssignedToThemTickets()
+    {
+        // GIVEN
+        // A user
+        $user = $this->getRandomUser();
+        // Who has a ticket
+        $this->loginUser($user);
+        $ticket = $this->createTicket();
+        // And a SupportAgent
+        $supportAgent = $this->getRandomSupportAgentUser();
+        $this->loginUser($supportAgent);
+        // And an admin
+        $admin = $this->getRandomAdminUser();
+        // That assigns the ticket to the SupportAgent
+        $this->loginUser($admin);
+        TicketService::assignSupportAgentToTicket($supportAgent, $ticket);
+
+
+        // WHEN
+        // The SupportAgent logs back in
+        $this->loginUser($supportAgent);
+        // And loads the ticket thread
+        $this->get(route('tickets.show', ['ticket' => $ticket->id]))
+            // THEN
+            // The user can see the reply form
+            ->assertStatus(200)
+            ->assertSee('Add Reply');
+
+    }
+
+    public function testSupportAgentCantSeeTicketReplyFormIfNotAssignedToThemTickets()
+    {
+        // GIVEN
+        // A user
+        $user = $this->getRandomUser();
+        // Who has a ticket
+        $this->loginUser($user);
+        $ticket = $this->createTicket();
+        // And a SupportAgent
+        $supportAgent = $this->getRandomSupportAgentUser();
+        // And another SupportAgent
+        $anotherSupportAgent = $this->getDifferentRandomSupportAgentUser($supportAgent);
+        // And an Admin
+        $admin = $this->getRandomAdminUser();
+        // that have this ticket assigned to anotherSupportAgent
+        $this->loginUser($admin);
+        TicketService::assignSupportAgentToTicket($anotherSupportAgent, $ticket);
+
+
+        // WHEN
+        // The SupportAgent logs in
+        $this->loginUser($supportAgent);
+        // And loads the ticket thread
+        $this->get(route('tickets.show', ['ticket' => $ticket->id]))
+            // THEN
+            // The user can see the reply form
+             ->assertDontSee('Add Reply');
+
+    }
+
+    public function testSupportAgentCanSeeAnyTicketThread()
+    {
+        // GIVEN
+        // A user
+        $user = $this->getRandomUser();
+        // Who has a ticket
+        $this->loginUser($user);
+        $ticket = $this->createTicket();
+        // And a SupportAgent
+        $supportAgent = $this->getRandomSupportAgentUser();
+
+
+        // WHEN
+        // The SupportAgent try to load the ticket thread
+        $this->loginUser($supportAgent);
+        $this->get(route('tickets.show', ['ticket' => $ticket->id]))
+        // THEN
+        // The SupportAgent succeed loading the ticket thread
+            ->assertStatus(200)
+            ->assertSee($ticket->body)
+            ->assertSee($ticket->title);
     }
 
     public function testAdminCanSeeAllTicketsButCantOwnATicket()

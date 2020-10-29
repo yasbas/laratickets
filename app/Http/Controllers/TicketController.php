@@ -40,6 +40,15 @@ class TicketController extends Controller
      */
     public function show(Ticket $ticket): View
     {
+        // Kick users who try to load another users tickets
+        if (
+            auth()->user()->hasRole(User::ROLE_USER) &&
+            auth()->user()->id != $ticket->user->id
+        ) {
+            abort(404);
+        }
+
+        // Render the ticket thread
         return view('tickets.show',[
             'ticket' => $ticket,
             'ticketReplies' => $ticket->replies()->orderBy('id', 'desc')->get(),
